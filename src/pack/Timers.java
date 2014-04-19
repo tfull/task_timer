@@ -16,9 +16,12 @@ import java.util.TimerTask;
 import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Random;
 import javax.swing.JFrame;
 
 public class Timers{
+    protected static final int MAX_COLUMN = 15;
+    protected static final int POMODORO_TIME = 1500;
     protected JFrame frame;
     protected BufferStrategy strategy;
     protected int mode;
@@ -27,6 +30,8 @@ public class Timers{
     protected long time;
     protected Data today_task;
     protected int h_index;
+    protected boolean pomodoro;
+    protected char recommended;
     
     public static void main(String[] args){
         new Timers();
@@ -45,6 +50,7 @@ public class Timers{
         this.strategy = this.frame.getBufferStrategy();
 
         this.mode = 0;
+        this.pomodoro = true;
 
         Calendar today = Calendar.getInstance();
 
@@ -124,6 +130,7 @@ public class Timers{
             this.today_task = new Data(today, subjects);
         }
 
+        this.recommended = this.iToChar(this.getRecommended());
         this.frame.addKeyListener(new Key());
 
         this.h_index = -1;
@@ -132,7 +139,7 @@ public class Timers{
     }
 
     synchronized public char iToChar(int i){
-        char[] cs = {'a','b','c','d','e','f','g','h','i','j','k','l'};
+        char[] cs = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'};
         return cs[i];
     }
 
@@ -142,6 +149,21 @@ public class Timers{
             boolean b_d = a.get(Calendar.DATE) == b.get(Calendar.DATE);
 
             return b_y && b_m && b_d;
+    }
+
+    synchronized public int getRecommended(){
+        ArrayList<Subject> subs = this.today_task.getSubjects();
+        int m = Math.min(subs.size(), MAX_COLUMN);
+        ArrayList<Integer> ins = new ArrayList<Integer>();
+
+        for(int i = 0; i < m; i++){
+            if(! subs.get(i).isCleared()){
+                ins.add(new Integer(i));
+            }
+        }
+
+        Random random = new Random();
+        return ins.get(random.nextInt(subs.size())).intValue();
     }
 
     synchronized public void render(){
@@ -165,11 +187,19 @@ public class Timers{
     synchronized public void render0(Graphics2D g){
         g.setColor(Color.WHITE);
         ArrayList<Subject> tasks = this.today_task.getSubjects();
-        int size = tasks.size();
+        int size = Math.min(tasks.size(), MAX_COLUMN);
 
         Calendar ca = this.today_task.getCalendar();
 
         g.drawString(String.format("%d/%02d/%02d", ca.get(Calendar.YEAR), ca.get(Calendar.MONTH) + 1, ca.get(Calendar.DATE)), 100, 50);
+
+        g.drawString(String.format("Recommended -> %c", this.recommended), 400, 50);
+
+        if(this.pomodoro){
+            g.setColor(Color.GREEN);
+            g.drawString("P", 700, 50);
+            g.setColor(Color.WHITE);
+        }
         
         for(int i = 0; i < size; i++){
             g.drawString(String.format("%c", this.iToChar(i)), 50, i * 30 + 100);
@@ -199,11 +229,17 @@ public class Timers{
         g.setColor(Color.WHITE);
         g.drawString(this.target.title, 300, 100);
         long s = System.currentTimeMillis() - this.time;
-        int n_res = this.target.result + (int)(s / 1000L);
+        int sec = (int)(s / 1000L);
+        int n_res = this.target.result + sec;
         if(this.target.assignment <= n_res){
             n_res = this.target.assignment;
             this.target.result = n_res;
             this.mode = 0;
+            this.recommended = this.iToChar(this.getRecommended());
+        }else if(this.pomodoro && sec > 1 && (this.target.assignment - n_res) % POMODORO_TIME == 0){
+            this.mode = 0;
+            this.target.result = n_res;
+            this.recommended = this.iToChar(this.getRecommended());
         }
         int t = this.target.assignment - n_res;
         g.drawString(this.intToTime(t), 300, 300);
@@ -214,10 +250,11 @@ public class Timers{
         Data d = this.histories.get(this.h_index);
         ArrayList<Subject> subjects = d.getSubjects();
         Calendar ca = d.getCalendar();
+        int size = Math.min(subjects.size(), MAX_COLUMN);
 
         g.drawString(String.format("%d/%d/%d", ca.get(Calendar.YEAR), ca.get(Calendar.MONTH) + 1, ca.get(Calendar.DATE)), 100, 50);
         
-        for(int i = 0; i < subjects.size(); i++){
+        for(int i = 0; i < size; i++){
             Subject subject = subjects.get(i);
 
             g.drawString(subject.title, 100, i * 30 + 100);
@@ -297,10 +334,13 @@ public class Timers{
                             }
                             Timers.this.mode = 2;
                         }
+                    }else if(c == 'P'){
+                        Timers.this.pomodoro = ! Timers.this.pomodoro;
                     }else{
                         ArrayList<Subject> subjects = Timers.this.today_task.getSubjects();
+                        int size = Math.min(subjects.size(), MAX_COLUMN);
                         
-                        for(int i = 0; i < subjects.size(); i++){
+                        for(int i = 0; i < size; i++){
                             Subject now_sub = subjects.get(i);
                             
                             if(c == Timers.this.iToChar(i) && now_sub.assignment > now_sub.result){
@@ -322,6 +362,7 @@ public class Timers{
                         }else{
                             Timers.this.target.result = n_res;
                         }
+                        Timers.this.recommended = Timers.this.iToChar(Timers.this.getRecommended());
                     }
                 }else{
                     if(c == 'n'){

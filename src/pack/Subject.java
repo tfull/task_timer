@@ -16,4 +16,8 @@ public class Subject{
         this.assignment = a;
         this.result = a;
     }
+
+    public boolean isCleared(){
+        return this.assignment <= this.result;
+    }
 }
