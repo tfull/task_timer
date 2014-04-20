@@ -130,7 +130,12 @@ public class Timers{
             this.today_task = new Data(today, subjects);
         }
 
-        this.recommended = this.iToChar(this.getRecommended());
+        if(this.today_task.getSubjects().size() == 0){
+            System.err.println("Error: 0 tasks!");
+            System.exit(1);
+        }
+
+        this.recommended = this.getRecommended();
         this.frame.addKeyListener(new Key());
 
         this.h_index = -1;
@@ -151,7 +156,7 @@ public class Timers{
             return b_y && b_m && b_d;
     }
 
-    synchronized public int getRecommended(){
+    synchronized public char getRecommended(){
         ArrayList<Subject> subs = this.today_task.getSubjects();
         int m = Math.min(subs.size(), MAX_COLUMN);
         ArrayList<Integer> ins = new ArrayList<Integer>();
@@ -164,8 +169,12 @@ public class Timers{
 
         int size = ins.size();
 
+        if(size == 0){
+            return '#';
+        }
+
         Random random = new Random();
-        return ins.get(random.nextInt(size)).intValue();
+        return this.iToChar(ins.get(random.nextInt(size)).intValue());
     }
 
     synchronized public void render(){
@@ -237,11 +246,11 @@ public class Timers{
             n_res = this.target.assignment;
             this.target.result = n_res;
             this.mode = 0;
-            this.recommended = this.iToChar(this.getRecommended());
+            this.recommended = this.getRecommended();
         }else if(this.pomodoro && sec > 1 && (this.target.assignment - n_res) % POMODORO_TIME == 0){
             this.mode = 0;
             this.target.result = n_res;
-            this.recommended = this.iToChar(this.getRecommended());
+            this.recommended = this.getRecommended();
         }
         int t = this.target.assignment - n_res;
         g.drawString(this.intToTime(t), 300, 300);
@@ -364,7 +373,7 @@ public class Timers{
                         }else{
                             Timers.this.target.result = n_res;
                         }
-                        Timers.this.recommended = Timers.this.iToChar(Timers.this.getRecommended());
+                        Timers.this.recommended = Timers.this.getRecommended();
                     }
                 }else{
                     if(c == 'n'){
