@@ -162,8 +162,10 @@ public class Timers{
             }
         }
 
+        int size = ins.size();
+
         Random random = new Random();
-        return ins.get(random.nextInt(subs.size())).intValue();
+        return ins.get(random.nextInt(size)).intValue();
     }
 
     synchronized public void render(){
