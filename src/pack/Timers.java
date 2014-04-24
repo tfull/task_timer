@@ -162,8 +162,16 @@ public class Timers{
         ArrayList<Integer> ins = new ArrayList<Integer>();
 
         for(int i = 0; i < m; i++){
-            if(! subs.get(i).isCleared()){
-                ins.add(new Integer(i));
+            Subject sub = subs.get(i);
+            if(! sub.isCleared()){
+                if(this.pomodoro){
+                    int weight = (sub.assignment - sub.result + POMODORO_TIME - 1) / POMODORO_TIME;
+                    for(int j = 0; j < weight; j++){
+                        ins.add(new Integer(i));
+                    }
+                }else{
+                    ins.add(new Integer(i));
+                }
             }
         }
 
