@@ -34,10 +34,18 @@ public class Timers{
     protected char recommended;
     
     public static void main(String[] args){
-        new Timers();
+        String s;
+
+        if(args.length > 0){
+            s = args[0];
+        }else{
+            s = "data/title.txt";
+        }
+
+        new Timers(s);
     }
 
-    public Timers(){
+    public Timers(String fname){
         this.frame = new JFrame("Timers");
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setSize(800, 600);
@@ -58,7 +66,7 @@ public class Timers{
         ArrayList<Subject> subjects = new ArrayList<Subject>();
 
         try{
-            FileReader fr = new FileReader("data/title.txt");
+            FileReader fr = new FileReader(fname);
             BufferedReader br = new BufferedReader(fr);
             String line;
 
