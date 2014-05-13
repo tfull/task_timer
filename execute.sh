@@ -1,8 +1,10 @@
-function normal{
+function normal
+{
     java -cp .:bin pack.Timers 2> /dev/null
 }
 
-function weekly{
+function weekly
+{
     local v
     v=`date "+%w"`
     if [ v = "0" ] || [ v = "6" ]; then
