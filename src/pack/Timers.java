@@ -114,15 +114,17 @@ public class Timers{
                 Calendar it_cal = Calendar.getInstance();
                 it_cal.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
                 it_cal.add(Calendar.DATE, 1);
-                
+
                 while(! this.isSameDay(it_cal, today)){
                     ArrayList<Subject> n_subs = new ArrayList<Subject>();
                     
+                    /*
                     for(int i = 0; i < subjects.size(); i++){
                         Subject subject = subjects.get(i);
 
                         n_subs.add(new Subject(subject.title, subject.assignment, 0));
                     }
+                    */
 
                     this.histories.add(new Data(it_cal, n_subs));
 
@@ -132,6 +134,7 @@ public class Timers{
                     
                     it_cal = n_cal;
                 }
+
                 this.today_task = new Data(today, subjects);
             }
         }else{
